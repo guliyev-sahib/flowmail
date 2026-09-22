@@ -4,7 +4,8 @@ Goal of Phase 0: get **50+ waitlist emails** or **5 merchants who say "I'd use/p
 for this"** before building more. Post the copy below, talk to real merchants, and
 watch signups. Everything here is a starting draft — edit to sound like you.
 
-Replace `LINK` with your deployed landing URL (see DEPLOY.md).
+Live landing: **https://flowmail-six.vercel.app/waitlist**
+(`https://flowmail-six.vercel.app/waitlist` below = that URL.)
 
 ---
 
@@ -23,7 +24,7 @@ Replace `LINK` with your deployed landing URL (see DEPLOY.md).
 > self-hosted email tool, or is managed hosting a must-have for you?** What's your
 > #1 frustration with your current email app?
 >
-> Waitlist / repo: LINK
+> Waitlist / repo: https://flowmail-six.vercel.app/waitlist
 
 *(Reply to every comment. The goal is conversations, not clicks.)*
 
@@ -41,7 +42,7 @@ Replace `LINK` with your deployed landing URL (see DEPLOY.md).
 > for Postgres/Redis, bring your own SMTP.
 >
 > Early days, feedback very welcome — especially on deployment ergonomics.
-> LINK
+> https://flowmail-six.vercel.app/waitlist
 
 ---
 
@@ -56,7 +57,7 @@ Replace `LINK` with your deployed landing URL (see DEPLOY.md).
 > Wedge = abandoned-cart recovery, the automation with the clearest ROI.
 >
 > Currently validating demand before going deep. If you run a store or know someone
-> who does, I'd love 10 minutes to hear about your email setup. Waitlist: LINK
+> who does, I'd love 10 minutes to hear about your email setup. Waitlist: https://flowmail-six.vercel.app/waitlist
 
 ---
 
@@ -68,7 +69,7 @@ Replace `LINK` with your deployed landing URL (see DEPLOY.md).
 > automations — abandoned cart, welcome, win-back — that you can self-host. I built
 > it because Klaviyo's per-contact pricing punishes growth and the open-source
 > options are newsletter-only. Tech: Next.js, Postgres, Redis/BullMQ, MJML. Would
-> love feedback on the architecture and the flow engine. LINK
+> love feedback on the architecture and the flow engine. https://flowmail-six.vercel.app/waitlist
 
 ---
 
