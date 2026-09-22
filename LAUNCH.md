@@ -4,8 +4,7 @@ Goal of Phase 0: get **50+ waitlist emails** or **5 merchants who say "I'd use/p
 for this"** before building more. Post the copy below, talk to real merchants, and
 watch signups. Everything here is a starting draft — edit to sound like you.
 
-Live landing: **https://flowmail-six.vercel.app/waitlist**
-(`https://flowmail-six.vercel.app/waitlist` below = that URL.)
+Live landing (already wired into the posts below): **https://flowmail-six.vercel.app/waitlist**
 
 ---
 
