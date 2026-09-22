@@ -1,0 +1,44 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma client
+        run: npx prisma generate
+
+      - name: Type check
+        run: npx tsc --noEmit
+
+      - name: Build
+        env:
+          # Dummy values so `next build` can evaluate env at build time.
+          DATABASE_URL: postgresql://u:p@localhost:5432/db
+          REDIS_URL: redis://localhost:6379
+          SHOPIFY_API_KEY: ci
+          SHOPIFY_API_SECRET: ci
+          SHOPIFY_SCOPES: read_orders
+          SHOPIFY_APP_URL: http://localhost:3000
+          SMTP_HOST: localhost
+          EMAIL_FROM: ci@example.com
+          APP_SECRET: ci-secret-ci-secret-ci-secret-ci-secret
+        run: npx next build
+
+      - name: Security audit (high+; non-blocking)
+        run: npm audit --audit-level=high || true

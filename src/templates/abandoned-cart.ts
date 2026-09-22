@@ -47,10 +47,12 @@ function safeUrl(url: string): string {
 export function abandonedCartMjml(args: AbandonedCartTemplateArgs): string {
   const greeting = args.firstName ? `Hi ${esc(args.firstName)},` : "Hi there,";
 
+  // Each line item is its own top-level mj-section (mj-section must NOT be
+  // nested inside an mj-column).
   const items = args.lineItems
     .map(
       (li) => `
-      <mj-section padding="8px 0">
+      <mj-section background-color="#ffffff" padding="8px 24px">
         <mj-column width="30%">
           ${
             li.image
@@ -85,9 +87,7 @@ export function abandonedCartMjml(args: AbandonedCartTemplateArgs): string {
           <mj-text>Your cart is still waiting. Complete your order before it's gone:</mj-text>
         </mj-column>
       </mj-section>
-      <mj-section background-color="#ffffff">
-        <mj-column>${items}</mj-column>
-      </mj-section>
+      ${items}
       <mj-section background-color="#ffffff" padding="24px">
         <mj-column>
           <mj-button href="${safeUrl(args.checkoutUrl)}" background-color="#111827">

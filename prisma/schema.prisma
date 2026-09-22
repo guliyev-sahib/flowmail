@@ -10,6 +10,14 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+/// Phase-0 waitlist signups from the marketing landing page.
+model Waitlist {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  source    String? // where the signup came from (utm, page, etc.)
+  createdAt DateTime @default(now())
+}
+
 /// A connected Shopify store.
 model Shop {
   id           String   @id @default(cuid())
