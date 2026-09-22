@@ -5,9 +5,11 @@ import {
   registerWebhooks,
   verifyOAuthHmac,
 } from "@/lib/shopify";
-import { sign, safeEqual, encrypt } from "@/lib/crypto";
+import { sign, safeEqual, encrypt, createToken } from "@/lib/crypto";
 import { prisma } from "@/lib/prisma";
 import { env } from "@/lib/env";
+
+const SESSION_TTL = 60 * 60 * 24 * 7; // 7 days
 
 export const runtime = "nodejs";
 
@@ -60,7 +62,18 @@ export async function GET(req: NextRequest) {
     console.error("Webhook registration failed:", err);
   }
 
-  const res = NextResponse.redirect(`${env.SHOPIFY_APP_URL}/?shop=${shop}`);
+  // Issue an authenticated session bound to this shop. The dashboard trusts
+  // THIS cookie, not the ?shop= query param, so stats aren't world-readable.
+  const session = createToken("session", { shop }, SESSION_TTL);
+
+  const res = NextResponse.redirect(`${env.SHOPIFY_APP_URL}/`);
   res.cookies.delete("flowmail_oauth_state");
+  res.cookies.set("flowmail_session", session, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/",
+    maxAge: SESSION_TTL,
+  });
   return res;
 }

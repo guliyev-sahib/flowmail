@@ -1,26 +1,27 @@
+import { cookies } from "next/headers";
 import { prisma } from "@/lib/prisma";
+import { verifyToken } from "@/lib/crypto";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 /**
- * Minimal dashboard. For a connected shop (?shop=...), shows headline numbers:
- * carts seen, recovered, and emails sent. Real UI comes later — this proves the
- * pipeline works end-to-end.
+ * Minimal dashboard. Stats are shown ONLY to an authenticated session
+ * (signed cookie set after OAuth) — never based on a ?shop= query param, which
+ * anyone could guess. Real embedded-app UI comes later.
  */
-export default async function Home({
-  searchParams,
-}: {
-  searchParams: Promise<{ shop?: string }>;
-}) {
-  const { shop: shopDomain } = await searchParams;
+export default async function Home() {
+  const sessionCookie = (await cookies()).get("flowmail_session")?.value;
+  const claims = sessionCookie
+    ? verifyToken<{ shop: string }>("session", sessionCookie)
+    : null;
 
   let stats: { carts: number; recovered: number; sent: number } | null = null;
   let connectedShop: string | null = null;
 
-  if (shopDomain) {
-    const shop = await prisma.shop.findUnique({ where: { domain: shopDomain } });
-    if (shop) {
+  if (claims?.shop) {
+    const shop = await prisma.shop.findUnique({ where: { domain: claims.shop } });
+    if (shop && !shop.uninstalledAt) {
       connectedShop = shop.domain;
       const [carts, recovered, sent] = await Promise.all([
         prisma.cartEvent.count({ where: { shopId: shop.id } }),

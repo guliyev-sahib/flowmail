@@ -24,7 +24,7 @@ Findings from the first internal security review:
 
 | # | Severity | Item | Status |
 |---|----------|------|--------|
-| 1 | High | Dashboard (`/?shop=`) has no auth — info disclosure | **OPEN** — needs Shopify session-token / embedded-app auth before launch |
+| 1 | High | Dashboard (`/?shop=`) has no auth — info disclosure | Fixed — dashboard now requires a signed session cookie issued after OAuth; ignores `?shop=`. (Full embedded-app session tokens still recommended later.) |
 | 2 | High | Unsubscribe mutated state on GET | Fixed (POST + confirmation) |
 | 3 | Medium | No rate limiting | Fixed on `/api/auth`, `/api/unsubscribe` (add to more as needed) |
 | 4 | Medium | Missing security headers / CSP | Fixed (`next.config.mjs`) |
@@ -43,7 +43,9 @@ our flow, no upstream patch available). `next build` and `tsc --noEmit` both pas
 
 ## Must-do before any production/public launch
 
-- [ ] Add real dashboard authentication (Shopify session tokens / embedded app).
+- [ ] Upgrade dashboard auth to full Shopify embedded-app session tokens (the
+      current signed-cookie session closes the info-disclosure hole; embedded
+      session tokens are the production-grade version).
 - [ ] Verify OAuth HMAC against the raw querystring (finding #6).
 - [ ] Migrate email rendering off `mjml` (or add an `overrides` for html-minifier)
       to clear the transitive REDoS advisories.
