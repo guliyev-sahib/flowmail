@@ -1,0 +1,130 @@
+// Flowmail data model — the core domain.
+// Run `npx prisma migrate dev` after setup.sh installs deps.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+/// A connected Shopify store.
+model Shop {
+  id           String   @id @default(cuid())
+  domain       String   @unique // my-store.myshopify.com
+  accessToken  String // Shopify Admin API token (encrypt at rest in prod)
+  name         String?
+  email        String?
+  installedAt  DateTime @default(now())
+  uninstalledAt DateTime?
+
+  contacts  Contact[]
+  flows     Flow[]
+  cartEvents CartEvent[]
+  messages  Message[]
+}
+
+/// A customer / subscriber of a store.
+model Contact {
+  id            String   @id @default(cuid())
+  shopId        String
+  shop          Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  email         String
+  firstName     String?
+  lastName      String?
+  shopifyId     String? // Shopify customer id
+  subscribed    Boolean  @default(true)
+  totalSpent    Float    @default(0)
+  ordersCount   Int      @default(0)
+  tags          String[]
+  createdAt     DateTime @default(now())
+
+  cartEvents CartEvent[]
+  messages   Message[]
+
+  @@unique([shopId, email])
+  @@index([shopId, subscribed])
+}
+
+/// A cart activity event, used to detect abandonment.
+model CartEvent {
+  id         String   @id @default(cuid())
+  shopId     String
+  shop       Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  contactId  String?
+  contact    Contact? @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  cartToken  String
+  lineItems  Json // [{ title, quantity, price, image, url }]
+  totalPrice Float
+  recovered  Boolean  @default(false) // became an order
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([shopId, cartToken])
+  @@index([shopId, recovered, updatedAt])
+}
+
+/// An automation (abandoned cart, welcome series, win-back, ...).
+model Flow {
+  id        String     @id @default(cuid())
+  shopId    String
+  shop      Shop       @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  name      String
+  trigger   FlowTrigger
+  active    Boolean    @default(false)
+  steps     FlowStep[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+enum FlowTrigger {
+  ABANDONED_CART
+  WELCOME
+  POST_PURCHASE
+  WIN_BACK
+}
+
+/// A single step in a flow: wait, then send an email.
+model FlowStep {
+  id          String   @id @default(cuid())
+  flowId      String
+  flow        Flow     @relation(fields: [flowId], references: [id], onDelete: Cascade)
+  order       Int // 0-based position in the flow
+  delayMinutes Int // wait before this step fires
+  subject     String
+  mjml        String // MJML source for the email body
+  messages    Message[]
+
+  @@index([flowId, order])
+}
+
+/// A sent (or scheduled) email to a contact.
+model Message {
+  id         String        @id @default(cuid())
+  shopId     String
+  shop       Shop          @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  contactId  String
+  contact    Contact       @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  flowStepId String?
+  flowStep   FlowStep?     @relation(fields: [flowStepId], references: [id], onDelete: SetNull)
+  status     MessageStatus @default(SCHEDULED)
+  scheduledAt DateTime?
+  sentAt     DateTime?
+  openedAt   DateTime?
+  clickedAt  DateTime?
+  createdAt  DateTime      @default(now())
+
+  @@index([shopId, status])
+  @@index([contactId])
+}
+
+enum MessageStatus {
+  SCHEDULED
+  SENT
+  OPENED
+  CLICKED
+  BOUNCED
+  SUPPRESSED // e.g. order completed / unsubscribed before send
+}
