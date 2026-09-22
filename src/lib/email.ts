@@ -16,11 +16,14 @@ const transporter = nodemailer.createTransport({
     : undefined,
 });
 
-export function renderMjml(mjml: string): string {
-  const { html, errors } = mjml2html(mjml, { validationLevel: "soft" });
+export async function renderMjml(mjml: string): Promise<string> {
+  const { html, errors } = await mjml2html(mjml, { validationLevel: "soft" });
   if (errors.length > 0) {
     // Soft validation: log but still send the best-effort HTML.
-    console.warn("MJML render warnings:", errors.map((e) => e.formattedMessage));
+    console.warn(
+      "MJML render warnings:",
+      errors.map((e: { formattedMessage: string }) => e.formattedMessage),
+    );
   }
   return html;
 }
@@ -39,7 +42,7 @@ export async function sendEmail({
   mjml,
   unsubscribeUrl,
 }: SendArgs): Promise<void> {
-  const html = renderMjml(mjml);
+  const html = await renderMjml(mjml);
   const headers: Record<string, string> = {};
   if (unsubscribeUrl) {
     headers["List-Unsubscribe"] = `<${unsubscribeUrl}>`;

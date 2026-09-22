@@ -23,7 +23,6 @@ fi
 echo "==> Installing runtime dependencies..."
 npm install \
   @prisma/client \
-  @shopify/shopify-api \
   bullmq ioredis \
   mjml \
   nodemailer \

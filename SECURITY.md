@@ -31,12 +31,22 @@ Findings from the first internal security review:
 | 5 | Medium | Email URLs not scheme-validated | Fixed (`safeUrl`) |
 | 6 | Low | OAuth HMAC compares decoded params; `host` (base64) may break valid checks | **TODO** — verify against raw querystring |
 | 7 | Low | No webhook dedupe by `X-Shopify-Webhook-Id` | Accepted (handlers are idempotent) |
-| 8 | Low | `npm audit` / lockfile not yet run | **TODO** — run after `npm install` |
+| 8 | High | nodemailer CVEs (SMTP injection, domain-validation bypass, DoS) | Fixed — upgraded to nodemailer 10.x |
+| 9 | Med | postcss advisories (build toolchain) | Fixed — upgraded to postcss 8.5.28 |
+| 10 | High×35 | `html-minifier@4.0.0` REDoS, transitive via `mjml` | **Accepted / tracked** — no upstream fix (unmaintained); not exploitable here (we only render our own templates, never attacker-supplied MJML/HTML). Plan: migrate email rendering off `mjml`. |
+
+## Dependency audit (last run: initial review)
+
+`npm audit`: 36 findings remain, of which **35 are the single `html-minifier`
+REDoS pulled in by `mjml`** (build/render-time, no attacker-controlled input in
+our flow, no upstream patch available). `next build` and `tsc --noEmit` both pass.
 
 ## Must-do before any production/public launch
 
 - [ ] Add real dashboard authentication (Shopify session tokens / embedded app).
 - [ ] Verify OAuth HMAC against the raw querystring (finding #6).
-- [ ] `npm audit` clean; commit `package-lock.json`; enable Dependabot.
+- [ ] Migrate email rendering off `mjml` (or add an `overrides` for html-minifier)
+      to clear the transitive REDoS advisories.
+- [ ] Enable Dependabot; keep `package-lock.json` committed.
 - [ ] Rotate `APP_SECRET` handling into a proper secret manager in prod.
 - [ ] Add integration tests for HMAC verification and suppression logic.

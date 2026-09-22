@@ -21,7 +21,8 @@
     "ioredis": "^5.4.2",
     "mjml": "^4.15.3",
     "next": "^15.1.0",
-    "nodemailer": "^6.9.16",
+    "nodemailer": "^10.0.10",
+    "postcss": "^8.5.28",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "zod": "^3.24.1"
