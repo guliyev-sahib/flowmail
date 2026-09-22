@@ -26,11 +26,15 @@ the same keys as `.env.example`:
 `DATABASE_URL, REDIS_URL, SHOPIFY_API_KEY, SHOPIFY_API_SECRET, SHOPIFY_SCOPES,
 SHOPIFY_APP_URL (your vercel URL), SMTP_*, EMAIL_FROM, APP_SECRET`.
 
-Then run the migration against Neon and deploy:
+**Migrations run automatically on deploy.** The `build` script is
+`prisma generate && prisma migrate deploy && next build`, and the datasource uses
+`directUrl = env("DATABASE_URL_UNPOOLED")` so migrations use Neon's direct
+connection while the app uses the pooled one. Just deploy:
 ```bash
-DATABASE_URL="<neon-url>" npx prisma migrate deploy
 vercel --prod
 ```
+(Neon's connection strings are stored as Sensitive env vars and can't be pulled
+via CLI — that's why migrations run inside the build, where the vars are injected.)
 
 Your landing will be live at `https://<project>.vercel.app/waitlist`.
 Put that URL into LAUNCH.md and start posting.
