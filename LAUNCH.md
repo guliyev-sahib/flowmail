@@ -72,6 +72,28 @@ Live landing (already wired into the posts below): **https://flowmail-six.vercel
 
 ---
 
+## 4b. Twitter / X
+
+Posted (@guliyevsah1b):
+
+> I got tired of Klaviyo's bill growing every time my Shopify list did.
+>
+> So I'm building Flowmail: open-source, self-hostable Shopify email automation — abandoned cart, welcome, win-back.
+>
+> Flat cost. Own your data.
+>
+> Early access 👇
+> https://flowmail-six.vercel.app/waitlist
+
+Follow-up thread ideas (reply to the above to build a thread):
+- "Why per-contact pricing punishes growth" + the ROI calculator link.
+- "Here's the whole thing, open source" + GitHub link.
+- Build-in-public updates as features ship (screenshots convert).
+
+Note: a brand-new / 0-follower account gets little organic reach. Twitter works
+best here as a link you point to from higher-traffic channels (Reddit, IH) and as
+a build-in-public log over time — not as the launch channel by itself.
+
 ## 5. Direct merchant outreach (DM / email — the highest-signal channel)
 
 > Hey [name] — I saw you run [store]. Quick question, not a pitch: what do you use
