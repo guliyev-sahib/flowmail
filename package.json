@@ -18,7 +18,7 @@
   "dependencies": {
     "@prisma/client": "^6.1.0",
     "@vercel/analytics": "^2.0.1",
-    "bullmq": "^5.34.0",
+    "bullmq": "^6.3.8",
     "ioredis": "^5.4.2",
     "mjml": "^4.15.3",
     "next": "^15.1.0",
