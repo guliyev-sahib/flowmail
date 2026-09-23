@@ -23,7 +23,24 @@ export default function OgImage() {
         }}
       >
         <div style={{ display: "flex", alignItems: "center", fontSize: 34, fontWeight: 700 }}>
-          ✉️&nbsp; Flowmail
+          <div
+            style={{
+              width: 40,
+              height: 40,
+              borderRadius: 10,
+              background: "#fff",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              color: "#4f46e5",
+              fontSize: 24,
+              fontWeight: 800,
+              marginRight: 16,
+            }}
+          >
+            F
+          </div>
+          Flowmail
         </div>
 
         <div style={{ display: "flex", flexDirection: "column" }}>
