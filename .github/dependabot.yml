@@ -5,6 +5,11 @@ updates:
     schedule:
       interval: "weekly"
     open-pull-requests-limit: 10
+    # Major bumps of these tend to be breaking (e.g. Prisma 7 changed its engine
+    # layout and broke the build). Skip majors; review those manually.
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
     groups:
       # Batch minor/patch bumps into one PR to reduce noise.
       minor-and-patch:
