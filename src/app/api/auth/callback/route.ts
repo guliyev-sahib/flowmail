@@ -66,7 +66,7 @@ export async function GET(req: NextRequest) {
   // THIS cookie, not the ?shop= query param, so stats aren't world-readable.
   const session = createToken("session", { shop }, SESSION_TTL);
 
-  const res = NextResponse.redirect(`${env.SHOPIFY_APP_URL}/`);
+  const res = NextResponse.redirect(`${env.SHOPIFY_APP_URL}/dashboard`);
   res.cookies.delete("flowmail_oauth_state");
   res.cookies.set("flowmail_session", session, {
     httpOnly: true,
