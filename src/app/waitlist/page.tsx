@@ -565,8 +565,23 @@ export default function Waitlist() {
           --line: #e2e8f0;
           --bg: #ffffff;
           --soft: #f8fafc;
+          --card: #ffffff;
+          --accent-soft: var(--accent-soft);
           --accent: #4f46e5;
           --accent-2: #7c3aed;
+        }
+        @media (prefers-color-scheme: dark) {
+          :root {
+            --ink: #e5e7eb;
+            --muted: #9ca3af;
+            --line: #27272a;
+            --bg: #0b0b0f;
+            --soft: #121218;
+            --card: #17171f;
+            --accent-soft: #1e1b4b;
+            --accent: #818cf8;
+            --accent-2: #a78bfa;
+          }
         }
         * {
           box-sizing: border-box;
@@ -582,6 +597,11 @@ export default function Waitlist() {
             Helvetica, Arial, sans-serif;
           line-height: 1.5;
           -webkit-font-smoothing: antialiased;
+        }
+        .page {
+          background: var(--bg);
+          color: var(--ink);
+          min-height: 100vh;
         }
         a {
           color: inherit;
@@ -620,7 +640,7 @@ export default function Waitlist() {
           font-weight: 700;
           letter-spacing: 0.6px;
           color: var(--accent);
-          background: #eef2ff;
+          background: var(--accent-soft);
           padding: 6px 12px;
           border-radius: 999px;
         }
@@ -655,7 +675,7 @@ export default function Waitlist() {
           position: sticky;
           top: 0;
           z-index: 20;
-          background: rgba(255, 255, 255, 0.85);
+          background: color-mix(in srgb, var(--bg) 85%, transparent);
           backdrop-filter: blur(10px);
           border-bottom: 1px solid var(--line);
         }
@@ -695,7 +715,7 @@ export default function Waitlist() {
           padding: 64px 0 40px;
           background: radial-gradient(
             1200px 400px at 70% -10%,
-            #eef2ff 0%,
+            var(--accent-soft) 0%,
             transparent 60%
           );
         }
@@ -770,7 +790,7 @@ export default function Waitlist() {
           gap: 24px;
           margin-top: 28px;
           text-align: left;
-          background: #fff;
+          background: var(--card);
           border: 1px solid var(--line);
           border-radius: 16px;
           padding: 28px;
@@ -826,18 +846,18 @@ export default function Waitlist() {
           margin-bottom: 16px;
         }
         .calc-out .price-cta {
-          background: #fff;
+          background: var(--card);
           color: var(--accent) !important;
         }
         .calc-out .price-cta:hover {
-          background: #eef2ff;
+          background: var(--accent-soft);
         }
 
         /* HERO CARD */
         .hero-card {
           border: 1px solid var(--line);
           border-radius: 16px;
-          background: #fff;
+          background: var(--card);
           box-shadow: 0 30px 60px -30px rgba(15, 23, 42, 0.25);
           overflow: hidden;
         }
@@ -910,7 +930,7 @@ export default function Waitlist() {
           font-size: 10px;
           font-weight: 700;
           color: var(--accent);
-          background: #eef2ff;
+          background: var(--accent-soft);
           padding: 3px 8px;
           border-radius: 999px;
         }
@@ -986,7 +1006,7 @@ export default function Waitlist() {
           margin-top: 32px;
         }
         .problem {
-          background: #fff;
+          background: var(--card);
           border: 1px solid var(--line);
           border-radius: 14px;
           padding: 22px;
@@ -1009,7 +1029,7 @@ export default function Waitlist() {
           margin-top: 36px;
         }
         .feat {
-          background: #fff;
+          background: var(--card);
           border: 1px solid var(--line);
           border-radius: 14px;
           padding: 24px;
@@ -1066,7 +1086,7 @@ export default function Waitlist() {
         table {
           width: 100%;
           border-collapse: collapse;
-          background: #fff;
+          background: var(--card);
           border: 1px solid var(--line);
           border-radius: 14px;
           overflow: hidden;
@@ -1090,7 +1110,7 @@ export default function Waitlist() {
           font-weight: 600;
         }
         .hot {
-          background: #eef2ff;
+          background: var(--accent-soft);
           font-weight: 700;
           color: var(--accent);
         }
@@ -1107,7 +1127,7 @@ export default function Waitlist() {
         }
         .price {
           position: relative;
-          background: #fff;
+          background: var(--card);
           border: 1px solid var(--line);
           border-radius: 16px;
           padding: 28px;
@@ -1165,7 +1185,7 @@ export default function Waitlist() {
           background: var(--accent);
         }
         .price-cta.ghost {
-          background: #fff;
+          background: var(--card);
           color: var(--ink) !important;
           border: 1px solid var(--line);
         }
@@ -1179,7 +1199,7 @@ export default function Waitlist() {
           margin-top: 24px;
         }
         .faq details {
-          background: #fff;
+          background: var(--card);
           border: 1px solid var(--line);
           border-radius: 12px;
           padding: 4px 18px;
@@ -1227,11 +1247,11 @@ export default function Waitlist() {
           margin: 0 auto;
         }
         .cta .form button {
-          background: #fff;
+          background: var(--card);
           color: var(--accent);
         }
         .cta .form button:hover {
-          background: #eef2ff;
+          background: var(--accent-soft);
         }
 
         /* FOOTER */
@@ -1268,6 +1288,28 @@ export default function Waitlist() {
           }
           .nav-links a:not(.nav-cta) {
             display: none;
+          }
+        }
+
+        /* Dark mode: primary buttons use var(--ink) as background, which flips
+           light in dark mode — repoint them to the accent with dark text. */
+        @media (prefers-color-scheme: dark) {
+          .nav-cta,
+          .form button,
+          .price-cta,
+          .mock-btn,
+          .step-n {
+            background: var(--accent);
+            color: #0b0b0f;
+          }
+          .form button:hover,
+          .nav-cta:hover,
+          .price-cta:hover {
+            background: var(--accent-2);
+          }
+          .price-cta.ghost {
+            background: var(--card);
+            color: var(--ink);
           }
         }
       `,

@@ -8,6 +8,10 @@
 [![License: AGPL-3.0](https://img.shields.io/badge/License-AGPL--3.0-blue.svg)](./LICENSE)
 [![Status: pre-alpha](https://img.shields.io/badge/status-pre--alpha-orange.svg)](#roadmap)
 
+![Flowmail — open-source Shopify email automation](docs/social-preview.png)
+
+**🌐 Landing & waitlist:** https://flowmail-six.vercel.app/waitlist
+
 ---
 
 ## Why this exists
