@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 /**
  * Phase-0 marketing landing page. Speaks to three audiences at once:
@@ -52,6 +52,82 @@ function WaitlistForm({ id }: { id?: string }) {
         <p className="err">Something went wrong. Please try again.</p>
       )}
     </form>
+  );
+}
+
+function WaitlistCount() {
+  const [n, setN] = useState<number | null>(null);
+  useEffect(() => {
+    fetch("/api/waitlist/count")
+      .then((r) => r.json())
+      .then((d) => setN(typeof d.count === "number" ? d.count : null))
+      .catch(() => {});
+  }, []);
+  // Honest social proof: only show once the number actually means something.
+  if (n === null || n < 15) return null;
+  return <p className="count">🔥 {n}+ stores already on the waitlist</p>;
+}
+
+function money(n: number) {
+  return n.toLocaleString("en-US", {
+    style: "currency",
+    currency: "USD",
+    maximumFractionDigits: 0,
+  });
+}
+
+function RoiCalculator() {
+  const [orders, setOrders] = useState(300);
+  const [aov, setAov] = useState(60);
+
+  // Model (transparent assumptions): ~70% of carts are abandoned, so completed
+  // orders are ~30% of carts. A solid abandoned-cart flow recovers ~10% of the
+  // abandoned ones.
+  const carts = orders / 0.3;
+  const abandoned = carts * 0.7;
+  const recoveredOrders = abandoned * 0.1;
+  const monthly = recoveredOrders * aov;
+  const yearly = monthly * 12;
+
+  return (
+    <div className="calc">
+      <div className="calc-inputs">
+        <label>
+          <span>
+            Monthly orders: <strong>{orders.toLocaleString()}</strong>
+          </span>
+          <input
+            type="range"
+            min={10}
+            max={3000}
+            step={10}
+            value={orders}
+            onChange={(e) => setOrders(Number(e.target.value))}
+          />
+        </label>
+        <label>
+          <span>
+            Average order value: <strong>{money(aov)}</strong>
+          </span>
+          <input
+            type="range"
+            min={10}
+            max={400}
+            step={5}
+            value={aov}
+            onChange={(e) => setAov(Number(e.target.value))}
+          />
+        </label>
+      </div>
+      <div className="calc-out">
+        <div className="calc-out-label">Revenue you could recover</div>
+        <div className="calc-monthly">{money(monthly)}<span>/mo</span></div>
+        <div className="calc-yearly">≈ {money(yearly)} per year</div>
+        <a className="price-cta" href="#join-final">
+          Start recovering it →
+        </a>
+      </div>
+    </div>
   );
 }
 
@@ -171,6 +247,7 @@ export default function Waitlist() {
             <div id="join">
               <WaitlistForm id="hero" />
             </div>
+            <WaitlistCount />
             <p className="microcopy">
               Free to self-host (AGPL-3.0) · No spam · Unsubscribe anytime
             </p>
@@ -304,8 +381,25 @@ export default function Waitlist() {
         </div>
       </section>
 
-      {/* COMPARISON */}
+      {/* ROI CALCULATOR */}
       <section className="section alt">
+        <div className="wrap narrow center">
+          <span className="badge">💰 REVENUE CALCULATOR</span>
+          <h2>See what you&apos;re leaving on the table</h2>
+          <p className="section-lead">
+            Most abandoned carts never come back on their own. Drag the sliders to
+            estimate what an abandoned-cart flow could recover for your store.
+          </p>
+          <RoiCalculator />
+          <p className="microcopy">
+            Estimate only. Assumes ~70% cart abandonment (industry average) and a
+            ~10% recovery rate from a well-run flow.
+          </p>
+        </div>
+      </section>
+
+      {/* COMPARISON */}
+      <section className="section">
         <div className="wrap narrow">
           <div className="center">
             <h2>How Flowmail compares</h2>
@@ -660,6 +754,83 @@ export default function Waitlist() {
           border-radius: 12px;
           color: #065f46;
           font-weight: 500;
+        }
+
+        .count {
+          margin-top: 14px;
+          font-size: 14px;
+          font-weight: 600;
+          color: var(--accent);
+        }
+
+        /* CALCULATOR */
+        .calc {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 24px;
+          margin-top: 28px;
+          text-align: left;
+          background: #fff;
+          border: 1px solid var(--line);
+          border-radius: 16px;
+          padding: 28px;
+          box-shadow: 0 24px 48px -30px rgba(15, 23, 42, 0.25);
+        }
+        .calc-inputs {
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          gap: 22px;
+        }
+        .calc-inputs label {
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+          font-size: 14px;
+          color: var(--muted);
+        }
+        .calc-inputs strong {
+          color: var(--ink);
+        }
+        .calc-inputs input[type="range"] {
+          width: 100%;
+          accent-color: var(--accent);
+        }
+        .calc-out {
+          background: linear-gradient(135deg, #4f46e5, #7c3aed);
+          color: #fff;
+          border-radius: 12px;
+          padding: 24px;
+          text-align: center;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+        }
+        .calc-out-label {
+          font-size: 13px;
+          color: #e0e7ff;
+        }
+        .calc-monthly {
+          font-size: 40px;
+          font-weight: 800;
+          line-height: 1.1;
+        }
+        .calc-monthly span {
+          font-size: 16px;
+          font-weight: 600;
+          color: #e0e7ff;
+        }
+        .calc-yearly {
+          font-size: 14px;
+          color: #e0e7ff;
+          margin-bottom: 16px;
+        }
+        .calc-out .price-cta {
+          background: #fff;
+          color: var(--accent) !important;
+        }
+        .calc-out .price-cta:hover {
+          background: #eef2ff;
         }
 
         /* HERO CARD */
@@ -1091,7 +1262,8 @@ export default function Waitlist() {
           .feat-grid,
           .steps,
           .price-grid,
-          .strip-grid {
+          .strip-grid,
+          .calc {
             grid-template-columns: 1fr;
           }
           .nav-links a:not(.nav-cta) {
