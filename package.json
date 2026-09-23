@@ -20,7 +20,7 @@
     "@vercel/analytics": "^2.0.1",
     "bullmq": "^5.34.0",
     "ioredis": "^5.4.2",
-    "mjml": "^4.15.3",
+    "mjml": "^5.4.1",
     "next": "^15.1.0",
     "nodemailer": "^10.0.10",
     "postcss": "^8.5.28",
@@ -29,7 +29,7 @@
     "zod": "^3.24.1"
   },
   "devDependencies": {
-    "@types/mjml": "^4.7.4",
+    "@types/mjml": "^5.0.0",
     "@types/node": "^22.10.0",
     "@types/nodemailer": "^6.4.17",
     "@types/react": "^19.0.0",
