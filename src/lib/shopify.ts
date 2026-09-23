@@ -89,7 +89,12 @@ export async function exchangeCodeForToken(
 /** Register the webhook topics we rely on for the abandoned-cart flow. */
 export async function registerWebhooks(shop: string, accessToken: string): Promise<void> {
   if (!isValidShopDomain(shop)) throw new Error("Invalid shop domain");
-  const topics = ["carts/update", "orders/create", "app/uninstalled"];
+  const topics = [
+    "carts/update",
+    "orders/create",
+    "customers/create",
+    "app/uninstalled",
+  ];
   await Promise.all(
     topics.map((topic) =>
       fetch(`https://${shop}/admin/api/2024-10/webhooks.json`, {

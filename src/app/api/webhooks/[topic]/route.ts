@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyWebhookHmac, isValidShopDomain } from "@/lib/shopify";
 import { prisma } from "@/lib/prisma";
-import { onCartUpdate, onOrderCreate } from "@/lib/flows";
+import { onCartUpdate, onOrderCreate, onCustomerCreate } from "@/lib/flows";
 import type { CartLineItem } from "@/templates/abandoned-cart";
 
 export const runtime = "nodejs";
@@ -50,6 +50,9 @@ export async function POST(
       case "orders-create":
         await handleOrderCreate(shop.id, payload);
         break;
+      case "customers-create":
+        await handleCustomerCreate(shop.id, payload);
+        break;
       case "app-uninstalled":
         await prisma.shop.update({
           where: { id: shop.id },
@@ -92,6 +95,12 @@ async function handleOrderCreate(shopId: string, p: Record<string, unknown>) {
   const email = extractEmail(p);
   const cartToken = typeof p.cart_token === "string" ? p.cart_token : null;
   await onOrderCreate(shopId, cartToken, email);
+}
+
+async function handleCustomerCreate(shopId: string, p: Record<string, unknown>) {
+  const email = extractEmail(p);
+  if (!email) return;
+  await onCustomerCreate(shopId, email, extractFirstName(p));
 }
 
 // --- Defensive extraction from loosely-typed webhook payloads ---

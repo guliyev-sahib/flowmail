@@ -16,19 +16,36 @@ export default async function Dashboard() {
     ? verifyToken<{ shop: string }>("session", sessionCookie)
     : null;
 
-  let stats: { carts: number; recovered: number; sent: number } | null = null;
+  let stats: {
+    carts: number;
+    recovered: number;
+    sent: number;
+    opened: number;
+    clicked: number;
+  } | null = null;
   let connectedShop: string | null = null;
 
   if (claims?.shop) {
     const shop = await prisma.shop.findUnique({ where: { domain: claims.shop } });
     if (shop && !shop.uninstalledAt) {
       connectedShop = shop.domain;
-      const [carts, recovered, sent] = await Promise.all([
+      const [carts, recovered, sent, opened, clicked] = await Promise.all([
         prisma.cartEvent.count({ where: { shopId: shop.id } }),
         prisma.cartEvent.count({ where: { shopId: shop.id, recovered: true } }),
-        prisma.message.count({ where: { shopId: shop.id, status: "SENT" } }),
+        prisma.message.count({
+          where: {
+            shopId: shop.id,
+            status: { in: ["SENT", "OPENED", "CLICKED"] },
+          },
+        }),
+        prisma.message.count({
+          where: { shopId: shop.id, openedAt: { not: null } },
+        }),
+        prisma.message.count({
+          where: { shopId: shop.id, clickedAt: { not: null } },
+        }),
       ]);
-      stats = { carts, recovered, sent };
+      stats = { carts, recovered, sent, opened, clicked };
     }
   }
 
@@ -83,10 +100,19 @@ export default async function Dashboard() {
       {connectedShop && stats && (
         <div style={{ marginTop: 24 }}>
           <h2 style={{ fontSize: 18 }}>{connectedShop}</h2>
-          <div style={{ display: "flex", gap: 16, marginTop: 12 }}>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))",
+              gap: 16,
+              marginTop: 12,
+            }}
+          >
             <Stat label="Carts seen" value={stats.carts} />
             <Stat label="Recovered" value={stats.recovered} />
             <Stat label="Emails sent" value={stats.sent} />
+            <Stat label="Opened" value={stats.opened} />
+            <Stat label="Clicked" value={stats.clicked} />
           </div>
         </div>
       )}

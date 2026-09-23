@@ -14,6 +14,7 @@ export interface AbandonedCartTemplateArgs {
   checkoutUrl: string;
   unsubscribeUrl: string;
   storeName: string;
+  pixelUrl?: string;
 }
 
 /** Escape user/store-controlled strings before embedding them in MJML/HTML. */
@@ -105,6 +106,11 @@ export function abandonedCartMjml(args: AbandonedCartTemplateArgs): string {
           </mj-text>
         </mj-column>
       </mj-section>
+      ${
+        args.pixelUrl
+          ? `<mj-raw><img src="${safeUrl(args.pixelUrl)}" width="1" height="1" alt="" style="display:none" /></mj-raw>`
+          : ""
+      }
     </mj-body>
   </mjml>`;
 }
