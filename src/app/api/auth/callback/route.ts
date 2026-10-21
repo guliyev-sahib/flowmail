@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import {
   exchangeCodeForToken,
   isValidShopDomain,
-  registerWebhooks,
   verifyOAuthHmac,
 } from "@/lib/shopify";
 import { sign, safeEqual, encrypt, createToken } from "@/lib/crypto";
@@ -55,12 +54,7 @@ export async function GET(req: NextRequest) {
     create: { domain: shop, accessToken: encrypt(accessToken) },
   });
 
-  // Register the webhooks we need (best-effort; failures are logged, not fatal).
-  try {
-    await registerWebhooks(shop, accessToken);
-  } catch (err) {
-    console.error("Webhook registration failed:", err);
-  }
+  // Webhooks are declared in shopify.app.toml; Shopify subscribes them on install.
 
   // Issue an authenticated session bound to this shop. The dashboard trusts
   // THIS cookie, not the ?shop= query param, so stats aren't world-readable.

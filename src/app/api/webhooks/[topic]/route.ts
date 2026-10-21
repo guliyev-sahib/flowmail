@@ -59,6 +59,18 @@ export async function POST(
       case "customers-create":
         await handleCustomerCreate(shop.id, payload);
         break;
+      case "customers-redact":
+        await handleCustomerRedact(shop.id, payload);
+        break;
+      case "shop-redact":
+        // Sent 48h after uninstall: delete everything we hold for the shop.
+        await prisma.shop.delete({ where: { id: shop.id } });
+        break;
+      case "customers-data_request":
+        // We store only email, name and cart/message history. Log so the
+        // operator can export it for the merchant (no automated export yet).
+        console.warn(`GDPR data request for ${shop.domain}:`, JSON.stringify(payload.customer ?? {}));
+        break;
       case "app-uninstalled":
         await prisma.shop.update({
           where: { id: shop.id },
@@ -101,4 +113,11 @@ async function handleCustomerCreate(shopId: string, p: Record<string, unknown>) 
   const email = extractEmail(p);
   if (!email) return;
   await onCustomerCreate(shopId, email, extractFirstName(p));
+}
+
+async function handleCustomerRedact(shopId: string, p: Record<string, unknown>) {
+  const email = extractEmail(p);
+  if (!email) return;
+  // Cascades to the contact's messages; cart events keep no contact link.
+  await prisma.contact.deleteMany({ where: { shopId, email } });
 }

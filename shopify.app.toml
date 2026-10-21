@@ -1,0 +1,56 @@
+# Shopify app configuration. Push changes with `shopify app deploy`.
+# Flowmail is a standalone (non-embedded) app: OAuth starts at /api/auth and
+# webhooks arrive at /api/webhooks/<topic> (HMAC-verified in the route).
+# Self-hosting? Replace the flowmail-six.vercel.app URLs with your own domain.
+
+client_id = "120a5626dd5a2bc8f42d15fc8cc8f5bb"
+name = "Flowmail"
+application_url = "https://flowmail-six.vercel.app/dashboard"
+embedded = false
+
+[access_scopes]
+# Checkout/order webhooks need read_orders; customers/create needs read_customers.
+scopes = "read_customers,read_orders,read_products"
+# Managed install: Shopify grants these scopes; /api/auth still runs the code grant.
+
+[auth]
+redirect_urls = ["https://flowmail-six.vercel.app/api/auth/callback"]
+
+[webhooks]
+api_version = "2026-07"
+
+  # Abandoned carts come from checkouts: carts/update never includes the email.
+  [[webhooks.subscriptions]]
+  topics = ["checkouts/create"]
+  uri = "https://flowmail-six.vercel.app/api/webhooks/checkouts-create"
+
+  [[webhooks.subscriptions]]
+  topics = ["checkouts/update"]
+  uri = "https://flowmail-six.vercel.app/api/webhooks/checkouts-update"
+
+  [[webhooks.subscriptions]]
+  topics = ["orders/create"]
+  uri = "https://flowmail-six.vercel.app/api/webhooks/orders-create"
+
+  [[webhooks.subscriptions]]
+  topics = ["customers/create"]
+  uri = "https://flowmail-six.vercel.app/api/webhooks/customers-create"
+
+  [[webhooks.subscriptions]]
+  topics = ["app/uninstalled"]
+  uri = "https://flowmail-six.vercel.app/api/webhooks/app-uninstalled"
+
+  # Mandatory privacy (GDPR) webhooks.
+  [[webhooks.subscriptions]]
+  compliance_topics = ["customers/data_request"]
+  uri = "https://flowmail-six.vercel.app/api/webhooks/customers-data_request"
+
+  [[webhooks.subscriptions]]
+  compliance_topics = ["customers/redact"]
+  uri = "https://flowmail-six.vercel.app/api/webhooks/customers-redact"
+
+  [[webhooks.subscriptions]]
+  compliance_topics = ["shop/redact"]
+  uri = "https://flowmail-six.vercel.app/api/webhooks/shop-redact"
+
+[build]

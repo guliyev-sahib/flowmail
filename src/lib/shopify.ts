@@ -84,36 +84,3 @@ export async function exchangeCodeForToken(
   if (!data.access_token) throw new Error("No access_token in response");
   return data.access_token;
 }
-
-/**
- * Register the webhook topics we rely on. Abandoned carts come from checkout
- * webhooks: `carts/update` payloads never include the shopper's email.
- */
-export async function registerWebhooks(shop: string, accessToken: string): Promise<void> {
-  if (!isValidShopDomain(shop)) throw new Error("Invalid shop domain");
-  const topics = [
-    "checkouts/create",
-    "checkouts/update",
-    "orders/create",
-    "customers/create",
-    "app/uninstalled",
-  ];
-  await Promise.all(
-    topics.map((topic) =>
-      fetch(`https://${shop}/admin/api/2024-10/webhooks.json`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-Shopify-Access-Token": accessToken,
-        },
-        body: JSON.stringify({
-          webhook: {
-            topic,
-            address: `${env.SHOPIFY_APP_URL}/api/webhooks/${topic.replace("/", "-")}`,
-            format: "json",
-          },
-        }),
-      }),
-    ),
-  );
-}
