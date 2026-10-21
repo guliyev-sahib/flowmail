@@ -29,7 +29,7 @@ Findings from the first internal security review:
 | 3 | Medium | No rate limiting | Fixed on `/api/auth`, `/api/unsubscribe` (add to more as needed) |
 | 4 | Medium | Missing security headers / CSP | Fixed (`next.config.mjs`) |
 | 5 | Medium | Email URLs not scheme-validated | Fixed (`safeUrl`) |
-| 6 | Low | OAuth HMAC compares decoded params; `host` (base64) may break valid checks | **TODO** — verify against raw querystring |
+| 6 | Low | OAuth HMAC compares decoded params; `host` (base64) may break valid checks | Fixed — signs sorted, URL-encoded params like Shopify's libraries; covered by `tests/shopify-hmac.test.ts` |
 | 7 | Low | No webhook dedupe by `X-Shopify-Webhook-Id` | Accepted (handlers are idempotent) |
 | 8 | High | nodemailer CVEs (SMTP injection, domain-validation bypass, DoS) | Fixed — upgraded to nodemailer 10.x |
 | 9 | Med | postcss advisories (build toolchain) | Fixed — upgraded to postcss 8.5.28 |
@@ -46,9 +46,9 @@ our flow, no upstream patch available). `next build` and `tsc --noEmit` both pas
 - [ ] Upgrade dashboard auth to full Shopify embedded-app session tokens (the
       current signed-cookie session closes the info-disclosure hole; embedded
       session tokens are the production-grade version).
-- [ ] Verify OAuth HMAC against the raw querystring (finding #6).
+- [x] Verify OAuth HMAC against the raw querystring (finding #6).
 - [ ] Migrate email rendering off `mjml` (or add an `overrides` for html-minifier)
       to clear the transitive REDoS advisories.
 - [ ] Enable Dependabot; keep `package-lock.json` committed.
 - [ ] Rotate `APP_SECRET` handling into a proper secret manager in prod.
-- [ ] Add integration tests for HMAC verification and suppression logic.
+- [ ] Add integration tests for HMAC verification and suppression logic. (HMAC + payload unit tests done: `npm test`; DB-backed suppression test still TODO.)

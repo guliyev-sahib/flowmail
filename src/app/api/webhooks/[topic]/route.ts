@@ -2,12 +2,17 @@ import { NextRequest, NextResponse } from "next/server";
 import { verifyWebhookHmac, isValidShopDomain } from "@/lib/shopify";
 import { prisma } from "@/lib/prisma";
 import { onCartUpdate, onOrderCreate, onCustomerCreate } from "@/lib/flows";
-import type { CartLineItem } from "@/templates/abandoned-cart";
+import {
+  extractEmail,
+  extractFirstName,
+  orderCartTokens,
+  parseCheckout,
+} from "@/lib/webhook-payloads";
 
 export const runtime = "nodejs";
 
 /**
- * Single webhook endpoint for all topics: /api/webhooks/carts-update etc.
+ * Single webhook endpoint for all topics: /api/webhooks/checkouts-update etc.
  * EVERY request is HMAC-verified against the RAW body before any processing.
  */
 export async function POST(
@@ -44,8 +49,9 @@ export async function POST(
 
   try {
     switch (topic) {
-      case "carts-update":
-        await handleCartUpdate(shop.id, payload);
+      case "checkouts-create":
+      case "checkouts-update":
+        await handleCheckout(shop.id, payload);
         break;
       case "orders-create":
         await handleOrderCreate(shop.id, payload);
@@ -72,63 +78,27 @@ export async function POST(
   return NextResponse.json({ ok: true });
 }
 
-async function handleCartUpdate(shopId: string, p: Record<string, unknown>) {
-  const email = extractEmail(p);
-  const cartToken = typeof p.token === "string" ? p.token : null;
-  if (!email || !cartToken) return; // no way to reach the shopper yet
-
-  const lineItems = extractLineItems(p);
-  const total = lineItems.reduce((s, li) => s + li.price * li.quantity, 0);
+async function handleCheckout(shopId: string, p: Record<string, unknown>) {
+  const checkout = parseCheckout(p);
+  if (!checkout) return; // no email yet, or already completed
 
   await onCartUpdate({
     shopId,
-    cartToken,
-    email,
-    firstName: extractFirstName(p),
-    lineItems,
-    totalPrice: total,
-    checkoutUrl: "",
+    cartToken: checkout.token,
+    email: checkout.email,
+    firstName: checkout.firstName,
+    lineItems: checkout.lineItems,
+    totalPrice: checkout.totalPrice,
+    checkoutUrl: checkout.checkoutUrl,
   });
 }
 
 async function handleOrderCreate(shopId: string, p: Record<string, unknown>) {
-  const email = extractEmail(p);
-  const cartToken = typeof p.cart_token === "string" ? p.cart_token : null;
-  await onOrderCreate(shopId, cartToken, email);
+  await onOrderCreate(shopId, orderCartTokens(p), extractEmail(p));
 }
 
 async function handleCustomerCreate(shopId: string, p: Record<string, unknown>) {
   const email = extractEmail(p);
   if (!email) return;
   await onCustomerCreate(shopId, email, extractFirstName(p));
-}
-
-// --- Defensive extraction from loosely-typed webhook payloads ---
-
-function extractEmail(p: Record<string, unknown>): string | null {
-  if (typeof p.email === "string" && p.email.includes("@")) return p.email;
-  const customer = p.customer as Record<string, unknown> | undefined;
-  if (customer && typeof customer.email === "string" && customer.email.includes("@")) {
-    return customer.email;
-  }
-  return null;
-}
-
-function extractFirstName(p: Record<string, unknown>): string | null {
-  const customer = p.customer as Record<string, unknown> | undefined;
-  if (customer && typeof customer.first_name === "string") return customer.first_name;
-  return null;
-}
-
-function extractLineItems(p: Record<string, unknown>): CartLineItem[] {
-  const items = Array.isArray(p.line_items) ? p.line_items : [];
-  return items.map((raw): CartLineItem => {
-    const li = raw as Record<string, unknown>;
-    return {
-      title: typeof li.title === "string" ? li.title : "Item",
-      quantity: typeof li.quantity === "number" ? li.quantity : 1,
-      price: typeof li.price === "string" ? parseFloat(li.price) : Number(li.price ?? 0),
-      image: typeof li.image === "string" ? li.image : undefined,
-    };
-  });
 }

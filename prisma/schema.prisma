@@ -70,6 +70,7 @@ model CartEvent {
   cartToken  String
   lineItems  Json // [{ title, quantity, price, image, url }]
   totalPrice Float
+  checkoutUrl String? // Shopify abandoned_checkout_url (restores the cart)
   recovered  Boolean  @default(false) // became an order
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt

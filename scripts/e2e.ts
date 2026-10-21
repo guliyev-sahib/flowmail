@@ -24,7 +24,7 @@ async function main() {
   await onCartUpdate({
     shopId: shop.id,
     cartToken,
-    email: "buyer@example.com",
+    email: `buyer+${Date.now()}@example.com`, // fresh contact each run (an earlier run may have unsubscribed)
     firstName: "Alex",
     lineItems: [
       {

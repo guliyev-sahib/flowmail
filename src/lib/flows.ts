@@ -77,6 +77,7 @@ export async function onCartUpdate(input: AbandonedCartInput): Promise<void> {
         lineItems: input.lineItems as object,
         totalPrice: input.totalPrice,
         contactId: contact.id,
+        checkoutUrl: input.checkoutUrl || undefined,
       },
     });
     return; // already scheduled on first sight; avoid duplicates
@@ -89,6 +90,7 @@ export async function onCartUpdate(input: AbandonedCartInput): Promise<void> {
       contactId: contact.id,
       lineItems: input.lineItems as object,
       totalPrice: input.totalPrice,
+      checkoutUrl: input.checkoutUrl || null,
     },
   });
 
@@ -125,12 +127,12 @@ export async function onCustomerCreate(
 /** Mark a cart recovered + suppress any pending messages when an order lands. */
 export async function onOrderCreate(
   shopId: string,
-  cartToken: string | null,
+  cartTokens: string[],
   email: string | null,
 ): Promise<void> {
-  if (cartToken) {
+  if (cartTokens.length > 0) {
     await prisma.cartEvent.updateMany({
-      where: { shopId, cartToken },
+      where: { shopId, cartToken: { in: cartTokens } },
       data: { recovered: true },
     });
   }
@@ -210,7 +212,11 @@ export async function processScheduledMessage(messageId: string): Promise<void> 
     mjml = abandonedCartMjml({
       firstName: message.contact.firstName,
       lineItems: (cart.lineItems as unknown as CartLineItem[]) ?? [],
-      checkoutUrl: trackedClickUrl(messageId, `https://${message.shop.domain}/cart`),
+      // Shopify's abandoned_checkout_url restores the exact cart; fall back to /cart.
+      checkoutUrl: trackedClickUrl(
+        messageId,
+        cart.checkoutUrl || `https://${message.shop.domain}/cart`,
+      ),
       unsubscribeUrl: unsubUrl,
       storeName,
       pixelUrl,

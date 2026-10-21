@@ -35,13 +35,12 @@ export function verifyOAuthHmac(searchParams: URLSearchParams): boolean {
   const provided = searchParams.get("hmac");
   if (!provided) return false;
 
-  const pairs: string[] = [];
-  for (const [key, value] of searchParams.entries()) {
-    if (key === "hmac" || key === "signature") continue;
-    pairs.push(`${key}=${value}`);
-  }
-  pairs.sort();
-  const message = pairs.join("&");
+  // Shopify signs the remaining params sorted by key and URL-encoded (as in its
+  // official libraries). Using decoded values breaks on e.g. base64 `host` with "=".
+  const rest = [...searchParams.entries()]
+    .filter(([key]) => key !== "hmac" && key !== "signature")
+    .sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0));
+  const message = new URLSearchParams(rest).toString();
   const digest = crypto
     .createHmac("sha256", env.SHOPIFY_API_SECRET)
     .update(message)
@@ -86,11 +85,15 @@ export async function exchangeCodeForToken(
   return data.access_token;
 }
 
-/** Register the webhook topics we rely on for the abandoned-cart flow. */
+/**
+ * Register the webhook topics we rely on. Abandoned carts come from checkout
+ * webhooks: `carts/update` payloads never include the shopper's email.
+ */
 export async function registerWebhooks(shop: string, accessToken: string): Promise<void> {
   if (!isValidShopDomain(shop)) throw new Error("Invalid shop domain");
   const topics = [
-    "carts/update",
+    "checkouts/create",
+    "checkouts/update",
     "orders/create",
     "customers/create",
     "app/uninstalled",
